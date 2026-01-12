@@ -2,8 +2,6 @@ import triton
 import triton.language as tl
 import torch
 
-
-
 @triton.jit 
 def RMSNorm(x_ptr,y_ptr,W,R,eps,n_cols,row_stride,BLOCK_SIZE:tl.constexpr):
   row=tl.program_id(0)
@@ -19,8 +17,7 @@ def RMSNorm(x_ptr,y_ptr,W,R,eps,n_cols,row_stride,BLOCK_SIZE:tl.constexpr):
   yptr=y_ptr+row*row_stride
   tl.store(yptr+offsets,y,mask=mask)
 
-
-  class RMS_Norm(torch.autograd.Function):
+class RMS_Norm(torch.autograd.Function):
   @staticmethod
   def forward(ctx,x,w,eps):
     shape=x.shape
@@ -36,7 +33,7 @@ def RMSNorm(x_ptr,y_ptr,W,R,eps,n_cols,row_stride,BLOCK_SIZE:tl.constexpr):
     ctx.save_for_backward(x,w,R)
     return y.view(*shape)
   
+ '''TODO  Back pass'''
 
-
-  def triton_rms_norm(x, w, eps=1e-5):
-    return RMS_Norm.apply(x, w, eps)
+def triton_rms_norm(x, w, eps=1e-5):
+   return RMS_Norm.apply(x, w, eps)
